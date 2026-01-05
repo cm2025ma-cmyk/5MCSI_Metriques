@@ -1,9 +1,4 @@
-# ------------------------------------------------------------------
-# Route 3 : L'histogramme (Graphique à colonnes)
-# ------------------------------------------------------------------
-@app.route('/histogramme/')
-def histogramme():
-    html_content = """
+
     <!DOCTYPE html>
     <html>
       <head>
@@ -54,5 +49,3 @@ def histogramme():
         </script>
       </body>
     </html>
-    """
-    return render_template_string(html_content)
