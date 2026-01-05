@@ -1,51 +1,45 @@
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Histogramme</title>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  </head>
+  <body>
+    <h2>Histogramme des températures - Tawarano</h2>
+    <div id="hist_div" style="width: 100%; height: 500px;"></div>
 
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <meta charset="UTF-8" />
-        <title>Histogramme Tawarano</title>
-        <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-      </head>
-      <body>
-        <h2 style="text-align: center;">Températures à Tawarano (Colonnes)</h2>
-        
-        <div id="chart_div" style="width: 900px; height: 500px; margin: auto;"></div>
-        
-        <script>
-          google.charts.load('current', { packages: ['corechart'] });
-          google.charts.setOnLoadCallback(drawChart);
+    <script>
+      google.charts.load('current', { packages: ['corechart'] });
+      google.charts.setOnLoadCallback(init);
 
-          function drawChart() {
-            // Récupération des données depuis l'API
-            fetch('/tawarano/')
-              .then(response => response.json())
-              .then(data => {
-                
-                var dataTable = new google.visualization.DataTable();
-                dataTable.addColumn('string', 'Date');
-                dataTable.addColumn('number', 'Température');
+      function init() {
+        fetch('/tawarano/')
+          .then(response => response.json())
+          .then(data => drawChart(data))
+          .catch(err => console.error("Erreur /tawarano/", err));
+      }
 
-                // Boucle pour remplir le tableau
-                data.results.forEach(entry => {
-                  var date = new Date(entry.Jour * 1000);
-                  dataTable.addRow([date.toLocaleDateString(), entry.temp]);
-                });
+      function drawChart(data) {
+        var dataTable = new google.visualization.DataTable();
+        dataTable.addColumn('string', 'Date');
+        dataTable.addColumn('number', 'Température (°C)');
 
-                // Options du graphique
-                var options = {
-                  title: 'Évolution des températures',
-                  legend: { position: 'none' }, // Pas de légende nécessaire ici
-                  colors: ['#e7711c'],          // On change la couleur pour le style (optionnel)
-                  vAxis: {title: 'Temp (°C)'},  // Titre de l'axe vertical
-                  hAxis: {title: 'Date'}        // Titre de l'axe horizontal
-                };
+        data.results.forEach(entry => {
+          var date = new Date(entry.Jour * 1000);
+          var temp = Math.round(entry.temp * 10) / 10; // arrondi 0,1°C
+          dataTable.addRow([date.toLocaleDateString(), temp]);
+        });
 
-                // C'EST ICI QUE ÇA CHANGE : On utilise ColumnChart au lieu de LineChart
-                var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
-                
-                chart.draw(dataTable, options);
-              });
-          }
-        </script>
-      </body>
-    </html>
+        var options = {
+          title: "Évolution des températures (Histogramme)",
+          legend: { position: "none" },
+          hAxis: { title: "Date" },
+          vAxis: { title: "Température (°C)" }
+        };
+
+        var chart = new google.visualization.ColumnChart(document.getElementById('hist_div'));
+        chart.draw(dataTable, options);
+      }
+    </script>
+  </body>
+</html>
