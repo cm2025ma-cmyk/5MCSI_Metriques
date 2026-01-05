@@ -23,15 +23,41 @@ def mongraphique():
 def histogramme():
     return render_template("histogramme.html")
 
-@app.route('/extract-minutes/<date_string>')
-def extract_minutes(date_string):
-        date_object = datetime.strptime(date_string, '%Y-%m-%dT%H:%M:%SZ')
-        minutes = date_object.minute
-        return jsonify({'minutes': minutes})
-  
 @app.route("/commits/")
 def commits():
-    return render_template("commits.html")  
+    # 1. Récupération
+    url = "https://api.github.com/repos/OpenRSI/5minutes/commits"
+    
+    try:
+        response = urlopen(url)
+        data_json = json.loads(response.read())
+        
+        commits_par_minute = {}
+        
+        # 2. Traitement (Ta méthode datetime)
+        for commit in data_json:
+            date_string = commit['commit']['author']['date']
+            date_object = datetime.strptime(date_string, '%Y-%m-%dT%H:%M:%SZ')
+            
+            minute = date_object.minute
+            minute_str = str(minute).zfill(2) # Transforme 5 en "05"
+            
+            if minute_str in commits_par_minute:
+                commits_par_minute[minute_str] += 1
+            else:
+                commits_par_minute[minute_str] = 1
+
+        # 3. Formatage pour Google Charts
+        data_for_chart = [['Minute', 'Commits']]
+        for minute in sorted(commits_par_minute.keys()):
+            data_for_chart.append([minute, commits_par_minute[minute]])
+            
+    except Exception as e:
+        return f"Erreur : {e}"
+
+    # 4. Envoi des données au fichier HTML
+    # C'est ici qu'on fait le lien !
+    return render_template("commits.html", data=data_for_chart)
   
 @app.route('/tawarano/')
 def meteo():
