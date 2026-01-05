@@ -26,7 +26,7 @@ def histogramme():
 @app.route("/commits/")
 def commits():
     # 1. Récupération
-    url = "https://api.github.com/repos/OpenRSI/cm2025ma-cmyk/5MCSI_Metriques"
+ url = "https://api.github.com/repos/cm2025ma-cmyk/5MCSI_Metriques/commits"
     
     try:
         response = urlopen(url)
