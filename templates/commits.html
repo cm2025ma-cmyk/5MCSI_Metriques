@@ -1,0 +1,33 @@
+   <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="UTF-8" />
+        <title>Activité Commits</title>
+        <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+      </head>
+      <body>
+        <h2 style="text-align: center;">Commits par minute (Repo: OpenRSI/5minutes)</h2>
+        <div id="chart_div" style="width: 900px; height: 500px; margin: auto;"></div>
+        
+        <script>
+          google.charts.load('current', { packages: ['corechart'] });
+          google.charts.setOnLoadCallback(drawChart);
+
+          function drawChart() {
+            // On récupère les données envoyées directement par Python (Jinja2)
+            var data = google.visualization.arrayToDataTable({{ data_for_chart | tojson }});
+
+            var options = {
+              title: 'Quantité de commits minute par minute',
+              hAxis: {title: 'Minute de l\\'heure'},
+              vAxis: {title: 'Nombre de commits'},
+              legend: { position: 'none' },
+              colors: ['#4285F4']
+            };
+
+            var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+            chart.draw(data, options);
+          }
+        </script>
+      </body>
+    </html>
