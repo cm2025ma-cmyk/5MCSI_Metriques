@@ -1,0 +1,58 @@
+# ------------------------------------------------------------------
+# Route 3 : L'histogramme (Graphique à colonnes)
+# ------------------------------------------------------------------
+@app.route('/histogramme/')
+def histogramme():
+    html_content = """
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="UTF-8" />
+        <title>Histogramme Tawarano</title>
+        <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+      </head>
+      <body>
+        <h2 style="text-align: center;">Températures à Tawarano (Colonnes)</h2>
+        
+        <div id="chart_div" style="width: 900px; height: 500px; margin: auto;"></div>
+        
+        <script>
+          google.charts.load('current', { packages: ['corechart'] });
+          google.charts.setOnLoadCallback(drawChart);
+
+          function drawChart() {
+            // Récupération des données depuis l'API
+            fetch('/tawarano/')
+              .then(response => response.json())
+              .then(data => {
+                
+                var dataTable = new google.visualization.DataTable();
+                dataTable.addColumn('string', 'Date');
+                dataTable.addColumn('number', 'Température');
+
+                // Boucle pour remplir le tableau
+                data.results.forEach(entry => {
+                  var date = new Date(entry.Jour * 1000);
+                  dataTable.addRow([date.toLocaleDateString(), entry.temp]);
+                });
+
+                // Options du graphique
+                var options = {
+                  title: 'Évolution des températures',
+                  legend: { position: 'none' }, // Pas de légende nécessaire ici
+                  colors: ['#e7711c'],          // On change la couleur pour le style (optionnel)
+                  vAxis: {title: 'Temp (°C)'},  // Titre de l'axe vertical
+                  hAxis: {title: 'Date'}        // Titre de l'axe horizontal
+                };
+
+                // C'EST ICI QUE ÇA CHANGE : On utilise ColumnChart au lieu de LineChart
+                var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+                
+                chart.draw(dataTable, options);
+              });
+          }
+        </script>
+      </body>
+    </html>
+    """
+    return render_template_string(html_content)
